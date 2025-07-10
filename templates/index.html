@@ -1,27 +1,23 @@
 <!doctype html>
 <html>
 <head>
-    <title>FB Auto Poster UI</title>
+    <title>FB Auto Poster (m.facebook.com)</title>
     <style>
-        body { font-family: sans-serif; background: #f3f3f3; padding: 20px; }
+        body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
         .log-box { background: #000; color: #0f0; padding: 10px; height: 300px; overflow-y: scroll; font-family: monospace; }
     </style>
 </head>
 <body>
-    <h2>📤 Facebook Auto Poster (Cookie-based)</h2>
+    <h2>📲 Facebook Auto Poster (m.facebook.com version)</h2>
     <form method="POST" enctype="multipart/form-data">
         <label>Upload cookies.txt:</label><br>
         <input type="file" name="cookies" required><br><br>
-
         <label>Upload messages.txt:</label><br>
         <input type="file" name="messages" required><br><br>
-
-        <label>Facebook Post URL (mbasic):</label><br>
+        <label>Facebook Post URL (m.facebook.com):</label><br>
         <input type="text" name="post_url" style="width:100%" required><br><br>
-
-        <label>Delay between comments (seconds):</label><br>
+        <label>Delay between messages (seconds):</label><br>
         <input type="number" name="delay" value="60" required><br><br>
-
         <button type="submit" name="start">▶️ Start Posting</button>
         <button type="submit" name="stop">⏹ Stop</button>
     </form>
