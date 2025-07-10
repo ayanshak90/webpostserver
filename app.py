@@ -19,12 +19,12 @@ def load_file(path):
 
 def extract_form_data(session, post_url, cookie):
     headers = {
-        "User-Agent": "Mozilla/5.0 (Linux; Android 10)",
-        "Cookie": cookie
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; Mobile)',
+        'Cookie': cookie
     }
     try:
         r = session.get(post_url, headers=headers, timeout=10)
-        soup = BeautifulSoup(r.text, "html.parser")
+        soup = BeautifulSoup(r.text, 'html.parser')
         form = soup.find("form", method="post")
         if not form or not form.get("action"):
             return None
@@ -38,11 +38,12 @@ def extract_form_data(session, post_url, cookie):
     except:
         return None
 
-def post_comments_loop(post_url, cookies, messages, delay):
+def post_comments(post_url, cookies, messages, delay):
     global is_running
     session = requests.Session()
-    total_sent = 0
+    msg_count = 0
     is_running = True
+
     while is_running:
         for msg in messages:
             for idx, cookie in enumerate(cookies):
@@ -51,26 +52,23 @@ def post_comments_loop(post_url, cookies, messages, delay):
                 try:
                     result = extract_form_data(session, post_url, cookie)
                     if not result:
-                        log = f"[{idx+1}] ❌ Cookie invalid/form missing — skipping."
-                        status_logs.append(log)
+                        status_logs.append(f"[{idx+1}] ❌ Cookie/form error.")
                         continue
                     action_url, data = result
                     data["comment_text"] = msg + " #AY9NSH_H3R3"
                     headers = {
-                        "User-Agent": "Mozilla/5.0 (Linux; Android 10)",
-                        "Cookie": cookie
+                        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; Mobile)',
+                        'Cookie': cookie
                     }
-                    full_url = "https://mbasic.facebook.com" + action_url
-                    res = session.post(full_url, data=data, headers=headers)
+                    full_url = "https://m.facebook.com" + action_url
+                    res = session.post(full_url, headers=headers, data=data)
 
-                    if "Your comment has been added" in res.text:
-                        total_sent += 1
-                        log = f"[{idx+1}] ✅ Sent: {msg}"
+                    if "Your comment has been added" in res.text or res.status_code == 200:
+                        msg_count += 1
+                        status_logs.append(f"[{idx+1}] ✅ Sent: {msg}")
                     else:
-                        log = f"[{idx+1}] ⚠️ Tried: {msg}"
-
-                    status_logs.append(log)
-                    status_logs.append(f"⏱ Time: {time.strftime('%Y-%m-%d %I:%M:%S %p')} | Total: {total_sent}")
+                        status_logs.append(f"[{idx+1}] ⚠️ Tried: {msg}")
+                    status_logs.append(f"⏱ {time.strftime('%Y-%m-%d %I:%M:%S %p')} | Total: {msg_count}")
                     time.sleep(delay)
                 except Exception as e:
                     status_logs.append(f"[{idx+1}] 🔴 Error: {e}")
@@ -97,7 +95,7 @@ def index():
             messages = load_file(msg_path)
 
             status_logs = ["🚀 Posting started..."]
-            posting_thread = threading.Thread(target=post_comments_loop, args=(post_url, cookies, messages, delay))
+            posting_thread = threading.Thread(target=post_comments, args=(post_url, cookies, messages, delay))
             posting_thread.start()
 
         elif "stop" in request.form:
@@ -107,4 +105,6 @@ def index():
     return render_template("index.html", logs=status_logs, running=is_running)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    import os
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+                        
