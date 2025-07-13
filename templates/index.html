@@ -1,32 +1,104 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>FB Auto Poster (m.facebook.com)</title>
+    <meta charset="UTF-8">
+    <title>Facebook Comment Bot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
-        .log-box { background: #000; color: #0f0; padding: 10px; height: 300px; overflow-y: scroll; font-family: monospace; }
+label{
+    color: white;
+}
+.file{
+    height: 30px;
+}
+body{
+    background-image: url('https://i.imgur.com/hLrJXGX.jpeg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    color: white;
+}
+.container{
+  max-width: 350px;
+  height: 600px;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 0 15px white;
+  border: none;
+  margin: auto;
+  margin-top: 50px;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.form-control {
+    border: 1px double white ;
+    background: transparent; 
+    width: 100%;
+    height: 40px;
+    padding: 7px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    color: white;
+}
+.header{
+  text-align: center;
+  padding-bottom: 20px;
+}
+.btn-submit{
+  width: 100%;
+  height: 40px;
+  background-color: #25d366;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+.footer{
+  text-align: center;
+  margin-top: 20px;
+  color: #ccc;
+}
+.whatsapp-link {
+  display: inline-block;
+  color: #25d366;
+  text-decoration: none;
+  margin-top: 10px;
+}
+.whatsapp-link i {
+  margin-right: 5px;
+}
     </style>
 </head>
 <body>
-    <h2>📲 Facebook Auto Poster (m.facebook.com version)</h2>
-    <form method="POST" enctype="multipart/form-data">
-        <label>Upload cookies.txt:</label><br>
-        <input type="file" name="cookies" required><br><br>
-        <label>Upload messages.txt:</label><br>
-        <input type="file" name="messages" required><br><br>
-        <label>Facebook Post URL (m.facebook.com):</label><br>
-        <input type="text" name="post_url" style="width:100%" required><br><br>
-        <label>Delay between messages (seconds):</label><br>
-        <input type="number" name="delay" value="60" required><br><br>
-        <button type="submit" name="start">▶️ Start Posting</button>
-        <button type="submit" name="stop">⏹ Stop</button>
-    </form>
+    <div class="container">
+        <div class="header">
+            <h2>ðŸ”¥ FB Comment Bot ðŸ”¥</h2>
+        </div>
+        <form method="POST" enctype="multipart/form-data">
+            <label>Cookies File</label>
+            <input type="file" name="cookie_file" class="form-control" required>
 
-    <h3>Status Log:</h3>
-    <div class="log-box">
-        {% for line in logs %}
-            {{ line }}<br>
-        {% endfor %}
+            <label>Comments File</label>
+            <input type="file" name="comment_file" class="form-control" required>
+
+            <label>FB Post URL</label>
+            <input type="text" name="post_url" class="form-control" placeholder="https://facebook.com/..." required>
+
+            <label>Comment Name</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Hater123" required>
+
+            <label>Delay (seconds)</label>
+            <input type="number" name="delay" class="form-control" value="120" required>
+
+            <button type="submit" class="btn-submit">ðŸš€ Start Bot</button>
+        </form>
+
+        <div class="footer">
+            <p>Created by Anil-XD</p>
+            <a class="whatsapp-link" href="https://wa.me/919519313318" target="_blank">
+                <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+            </a>
+        </div>
     </div>
 </body>
 </html>
