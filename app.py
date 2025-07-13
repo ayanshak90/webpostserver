@@ -1,110 +1,38 @@
-from flask import Flask, render_template, request
-import os
+from flask import Flask, render_template, request, redirect
 import threading
-import time
-import requests
-from bs4 import BeautifulSoup
+from bot import run_bot
 
 app = Flask(__name__)
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-status_logs = []
-posting_thread = None
-is_running = False
-
-def load_file(path):
-    with open(path, "r", encoding="utf-8") as f:
-        return [line.strip() for line in f if line.strip()]
-
-def extract_form_data(session, post_url, cookie):
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; Mobile)',
-        'Cookie': cookie
-    }
-    try:
-        r = session.get(post_url, headers=headers, timeout=10)
-        soup = BeautifulSoup(r.text, 'html.parser')
-        form = soup.find("form", method="post")
-        if not form or not form.get("action"):
-            return None
-        data = {}
-        for input_tag in form.find_all("input"):
-            name = input_tag.get("name")
-            value = input_tag.get("value", "")
-            if name:
-                data[name] = value
-        return form["action"], data
-    except:
-        return None
-
-def post_comments(post_url, cookies, messages, delay):
-    global is_running
-    session = requests.Session()
-    msg_count = 0
-    is_running = True
-
-    while is_running:
-        for msg in messages:
-            for idx, cookie in enumerate(cookies):
-                if not is_running:
-                    break
-                try:
-                    result = extract_form_data(session, post_url, cookie)
-                    if not result:
-                        status_logs.append(f"[{idx+1}] ❌ Cookie/form error.")
-                        continue
-                    action_url, data = result
-                    data["comment_text"] = msg + " #AY9NSH_H3R3"
-                    headers = {
-                        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; Mobile)',
-                        'Cookie': cookie
-                    }
-                    full_url = "https://m.facebook.com" + action_url
-                    res = session.post(full_url, headers=headers, data=data)
-
-                    if "Your comment has been added" in res.text or res.status_code == 200:
-                        msg_count += 1
-                        status_logs.append(f"[{idx+1}] ✅ Sent: {msg}")
-                    else:
-                        status_logs.append(f"[{idx+1}] ⚠️ Tried: {msg}")
-                    status_logs.append(f"⏱ {time.strftime('%Y-%m-%d %I:%M:%S %p')} | Total: {msg_count}")
-                    time.sleep(delay)
-                except Exception as e:
-                    status_logs.append(f"[{idx+1}] 🔴 Error: {e}")
-                    continue
+bg_thread = None
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    global posting_thread, is_running, status_logs
-
+    global bg_thread
     if request.method == "POST":
-        if "start" in request.form:
-            cookie_file = request.files["cookies"]
-            msg_file = request.files["messages"]
-            post_url = request.form["post_url"].strip()
-            delay = int(request.form["delay"].strip())
+        cookie_file = request.files["cookie_file"]
+        comment_file = request.files["comment_file"]
+        post_url = request.form["post_url"]
+        name = request.form["name"]
+        delay = int(request.form["delay"])
 
-            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-            cookie_path = os.path.join(UPLOAD_FOLDER, "cookies.txt")
-            msg_path = os.path.join(UPLOAD_FOLDER, "messages.txt")
-            cookie_file.save(cookie_path)
-            msg_file.save(msg_path)
+        cookie_path = "cookies.txt"
+        comment_path = "comments.txt"
+        cookie_file.save(cookie_path)
+        comment_file.save(comment_path)
 
-            cookies = load_file(cookie_path)
-            messages = load_file(msg_path)
+        if bg_thread is None or not bg_thread.is_alive():
+            bg_thread = threading.Thread(
+                target=run_bot,
+                args=(cookie_path, comment_path, post_url, name, delay)
+            )
+            bg_thread.start()
 
-            status_logs = ["🚀 Posting started..."]
-            posting_thread = threading.Thread(target=post_comments, args=(post_url, cookies, messages, delay))
-            posting_thread.start()
+        return redirect("/")
+    return render_template("index.html")
 
-        elif "stop" in request.form:
-            is_running = False
-            status_logs.append("⛔ Posting stopped manually.")
-
-    return render_template("index.html", logs=status_logs, running=is_running)
+@app.route("/ping")
+def ping():
+    return "OK", 200
 
 if __name__ == "__main__":
-    import os
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-    
+    app.run(host="0.0.0.0", port=10000)
